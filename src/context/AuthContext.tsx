@@ -20,47 +20,65 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   const fetchProfile = async () => {
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    try {
+      const supabase = createClient()
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
 
-    if (!user) {
+      if (userError || !user) {
+        setProfile(null)
+        setLoading(false)
+        return
+      }
+
+      const { data, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (profileError || !data) {
+        setProfile(null)
+      } else {
+        setProfile(data)
+      }
+    } catch (err) {
+      console.error('AuthContext error:', err)
       setProfile(null)
+    } finally {
+      // SIEMPRE desactivar loading sin importar qué pase
       setLoading(false)
-      return
     }
-
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single()
-
-    setProfile(data)
-    setLoading(false)
   }
 
   useEffect(() => {
-    fetchProfile()
-
     const supabase = createClient()
+
+    // Timeout de seguridad — si en 5 segundos no resuelve, quitar el loading
+    const timeout = setTimeout(() => {
+      setLoading(false)
+    }, 5000)
+
+    fetchProfile().finally(() => {
+      clearTimeout(timeout)
+    })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
-          const { data } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single()
-          setProfile(data)
+          await fetchProfile()
         } else if (event === 'SIGNED_OUT') {
           setProfile(null)
+          setLoading(false)
+        } else if (event === 'TOKEN_REFRESHED') {
+          await fetchProfile()
         }
-        setLoading(false)
       }
     )
 
-    return () => subscription.unsubscribe()
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(timeout)
+    }
   }, [])
 
   return (
