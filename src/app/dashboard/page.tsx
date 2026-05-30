@@ -18,7 +18,12 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!profile) return
+    if (authLoading) return
+
+    if (!profile) {
+      router.push('/auth/login')
+      return
+    }
 
     const fetchData = async () => {
       const supabase = createClient()
@@ -66,7 +71,7 @@ export default function DashboardPage() {
     const handleFocus = () => fetchData()
     window.addEventListener('focus', handleFocus)
     return () => window.removeEventListener('focus', handleFocus)
-  }, [profile, router])
+  }, [profile, authLoading, router])
 
   if (authLoading || loading) {
     return (

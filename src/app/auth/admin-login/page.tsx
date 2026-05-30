@@ -124,7 +124,7 @@ export default function AdminLoginPage() {
             </div>
 
             <button className="btn-gold" type="submit" style={{ width: '100%', marginTop: '8px', background: 'linear-gradient(135deg, #8B0000, #CC2200)' }}
-              disabled={!form.email || !form.password || !form.adminCode}>
+              disabled={loading || !form.email || !form.password || !form.adminCode}>
               Acceder al Panel
             </button>
 

@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
   try {
     const { email, password, adminCode } = await request.json()
 
-    // Verificar código admin
+    // 1. Verificar código admin primero
     if (adminCode !== process.env.ADMIN_CODE) {
       return NextResponse.json(
         { error: 'Código de administrador incorrecto' },
@@ -13,13 +13,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Usar service role para verificar y actualizar rol
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SECRET_KEY!
     )
 
-    // Buscar usuario por email
+    // 2. Verificar que el usuario existe
     const { data: users } = await supabase.auth.admin.listUsers()
     const user = users?.users.find(u => u.email === email)
 
@@ -30,11 +29,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Asignar rol admin si no lo tiene
-    await supabase
-      .from('profiles')
-      .update({ rol: 'admin' })
-      .eq('id', user.id)
+    // 3. Verificar credenciales antes de promover
+    const { createClient: createBrowserClient } = await import('@supabase/supabase-js')
+    const anonClient = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+    const { error: signInError } = await anonClient.auth.signInWithPassword({ email, password })
+
+    if (signInError) {
+      return NextResponse.json(
+        { error: 'Credenciales incorrectas' },
+        { status: 401 }
+      )
+    }
+
+    // 4. Solo después de verificar todo, promover a admin
+    await supabase.from('profiles').update({ rol: 'admin' }).eq('id', user.id)
 
     return NextResponse.json({ success: true })
 

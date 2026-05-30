@@ -1,6 +1,5 @@
 'use client'
 import { useRealtimeStats } from '@/hooks/useRealtimeStats'
-import UMLBadge from '@/components/UMLBadge'
 import {
   BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer

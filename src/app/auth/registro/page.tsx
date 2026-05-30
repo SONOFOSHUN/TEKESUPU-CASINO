@@ -32,8 +32,14 @@ export default function RegistroPage() {
         body: JSON.stringify({ dni: form.dni }),
       })
 
-      const data = await res.json()
+      // Si la API falla, bloquear por seguridad
+      if (!res.ok) {
+        setError('Error al verificar DNI. Por favor intenta de nuevo.')
+        setStep('form')
+        return
+      }
 
+      const data = await res.json()
       if (data.tiene_ludopatia) {
         setStep('blocked')
         return
