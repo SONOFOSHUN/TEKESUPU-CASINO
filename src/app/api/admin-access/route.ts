@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
     const { email, password, adminCode } = await request.json()
 
     // Verificar código admin
-    if (adminCode !== process.env.NEXT_PUBLIC_ADMIN_CODE) {
+    if (adminCode !== process.env.ADMIN_CODE) {
       return NextResponse.json(
         { error: 'Código de administrador incorrecto' },
         { status: 401 }
