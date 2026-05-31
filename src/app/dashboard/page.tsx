@@ -26,45 +26,49 @@ export default function DashboardPage() {
     }
 
     const fetchData = async () => {
-      const supabase = createClient()
+      try {
+        const supabase = createClient()
 
-      if (profile.rol === 'admin' || profile.rol === 'inversor') {
-        router.push('/admin/estadisticas')
-        return
+        if (profile.rol === 'admin' || profile.rol === 'inversor') {
+          router.push('/admin/estadisticas')
+          return
+        }
+
+        const { data: apuestasData } = await supabase
+          .from('apuestas')
+          .select('*')
+          .eq('usuario_id', profile.id)
+          .order('created_at', { ascending: false })
+          .limit(5)
+        if (apuestasData) setApuestas(apuestasData)
+
+        const { count: totalPartidasCount } = await supabase
+          .from('apuestas')
+          .select('*', { count: 'exact', head: true })
+          .eq('usuario_id', profile.id)
+        if (totalPartidasCount !== null) setTotalPartidas(totalPartidasCount ?? 0)
+
+        const { data: limitesData } = await supabase
+          .from('limites_usuario')
+          .select('*')
+          .eq('usuario_id', profile.id)
+          .single()
+        if (limitesData) setLimites(limitesData)
+
+        const hoy = new Date(); hoy.setHours(0, 0, 0, 0)
+        const { data: apuestasHoy } = await supabase
+          .from('apuestas')
+          .select('monto')
+          .eq('usuario_id', profile.id)
+          .gte('created_at', hoy.toISOString())
+        if (apuestasHoy) {
+          setGastadoHoy(apuestasHoy.reduce((acc, a) => acc + Number(a.monto), 0))
+        }
+      } catch (err) {
+        console.error('Dashboard fetchData error:', err)
+      } finally {
+        setLoading(false)
       }
-
-      const { data: apuestasData } = await supabase
-        .from('apuestas')
-        .select('*')
-        .eq('usuario_id', profile.id)
-        .order('created_at', { ascending: false })
-        .limit(5)
-      if (apuestasData) setApuestas(apuestasData)
-
-      const { count: totalPartidasCount } = await supabase
-        .from('apuestas')
-        .select('*', { count: 'exact', head: true })
-        .eq('usuario_id', profile.id)
-      if (totalPartidasCount !== null) setTotalPartidas(totalPartidasCount ?? 0)
-
-      const { data: limitesData } = await supabase
-        .from('limites_usuario')
-        .select('*')
-        .eq('usuario_id', profile.id)
-        .single()
-      if (limitesData) setLimites(limitesData)
-
-      const hoy = new Date(); hoy.setHours(0, 0, 0, 0)
-      const { data: apuestasHoy } = await supabase
-        .from('apuestas')
-        .select('monto')
-        .eq('usuario_id', profile.id)
-        .gte('created_at', hoy.toISOString())
-      if (apuestasHoy) {
-        setGastadoHoy(apuestasHoy.reduce((acc, a) => acc + Number(a.monto), 0))
-      }
-
-      setLoading(false)
     }
 
     fetchData()
