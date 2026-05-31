@@ -17,7 +17,11 @@ export default function SaldoPage() {
   const [saldo, setSaldo] = useState(0)
 
   useEffect(() => {
-    if (!profile) return
+    if (authLoading) return
+    if (!profile) {
+      router.push('/auth/login')
+      return
+    }
     const fetchData = async () => {
       const supabase = createClient()
 
@@ -34,7 +38,7 @@ export default function SaldoPage() {
       setLoading(false)
     }
     fetchData()
-  }, [profile, router])
+  }, [profile, authLoading, router])
 
   const handleDeposit = async () => {
     const amt = parseFloat(depositAmt)

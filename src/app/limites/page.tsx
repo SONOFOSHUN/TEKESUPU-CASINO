@@ -19,7 +19,11 @@ export default function LimitesPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!profile) return
+    if (authLoading) return
+    if (!profile) {
+      router.push('/auth/login')
+      return
+    }
     const fetchData = async () => {
       const supabase = createClient()
 
@@ -53,7 +57,7 @@ export default function LimitesPage() {
       setLoading(false)
     }
     fetchData()
-  }, [profile, router])
+  }, [profile, authLoading, router])
 
   const handleSave = async () => {
     if (!profile || !limites) return

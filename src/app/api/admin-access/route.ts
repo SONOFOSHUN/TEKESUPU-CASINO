@@ -18,8 +18,8 @@ export async function POST(request: NextRequest) {
       process.env.SUPABASE_SECRET_KEY!
     )
 
-    // 2. Verificar que el usuario existe
-    const { data: users } = await supabase.auth.admin.listUsers()
+    // 2. Buscar usuario por email usando paginación suficiente
+    const { data: users } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 })
     const user = users?.users.find(u => u.email === email)
 
     if (!user) {

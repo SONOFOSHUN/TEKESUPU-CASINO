@@ -66,23 +66,30 @@ export default function RegistroPage() {
         return
       }
 
-      // Crear fila en profiles y limites_usuario inmediatamente
+      // Crear fila en profiles y limites_usuario — upsert evita conflicto si ya existe el trigger
       if (signUpData?.user) {
-        await supabase.from('profiles').insert({
+        const { error: profileInsertError } = await supabase.from('profiles').upsert({
           id: signUpData.user.id,
           nombre: form.nombre,
           dni: form.dni,
           rol: 'usuario',
           tiene_ludopatia: false,
           saldo_virtual: 1000,
-        })
-        await supabase.from('limites_usuario').insert({
+        }, { onConflict: 'id' })
+        if (profileInsertError) {
+          console.warn('Profile upsert:', profileInsertError.message)
+        }
+
+        const { error: limitesInsertError } = await supabase.from('limites_usuario').upsert({
           usuario_id: signUpData.user.id,
           limite_diario: 500,
           limite_semanal: 2000,
           limite_mensual: 6000,
           limite_sesion_min: 60,
-        })
+        }, { onConflict: 'usuario_id' })
+        if (limitesInsertError) {
+          console.warn('Limites upsert:', limitesInsertError.message)
+        }
       }
 
       setStep('success')
