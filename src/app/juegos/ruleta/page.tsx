@@ -23,7 +23,7 @@ const BET_TYPES = ['Rojo', 'Negro', 'Par', 'Impar', 'Número específico']
 
 export default function RuletaPage() {
   const router = useRouter()
-  const { profile, loading: authLoading, refresh: refreshProfile } = useAuth()
+  const { profile, loading: authLoading, isAuthenticated, refresh: refreshProfile } = useAuth()
   const [limites, setLimites] = useState<LimiteUsuario | null>(null)
   const [gastadoHoy, setGastadoHoy] = useState(0)
   const [betType, setBetType] = useState('')
@@ -54,7 +54,7 @@ export default function RuletaPage() {
       }
     }
     fetchData()
-  }, [profile, router])
+  }, [profile])
 
   const handleSpin = async () => {
     if (!betType || !betAmount || !profile) return
@@ -172,11 +172,13 @@ export default function RuletaPage() {
     setSpinning(false)
   }
 
-  if (authLoading || !profile) return (
+  if (authLoading) return (
     <div style={{ minHeight:'100vh', background:'var(--casino-dark)', display:'flex', alignItems:'center', justifyContent:'center' }}>
       <span className="spinner" />
     </div>
   )
+  if (!isAuthenticated) { router.push('/auth/login'); return null }
+  if (!profile) return null
 
   const segs = ROULETTE.length
 

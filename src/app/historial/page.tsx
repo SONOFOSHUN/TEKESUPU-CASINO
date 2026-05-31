@@ -10,13 +10,18 @@ import Link from 'next/link'
 
 export default function HistorialPage() {
   const router = useRouter()
-  const { profile, loading: authLoading } = useAuth()
+  const { profile, loading: authLoading, isAuthenticated } = useAuth()
   const [apuestas, setApuestas] = useState<Apuesta[]>([])
   const [filtro, setFiltro] = useState<string>('todos')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!profile) return
+    if (authLoading) return
+    if (!isAuthenticated) {
+      router.push('/auth/login')
+      return
+    }
+    if (!profile) { setLoading(false); return }
     const fetchData = async () => {
       const supabase = createClient()
 
@@ -29,7 +34,7 @@ export default function HistorialPage() {
       setLoading(false)
     }
     fetchData()
-  }, [profile, router])
+  }, [profile, authLoading, isAuthenticated, router])
 
   if (authLoading || loading) return (
     <div style={{ minHeight:'100vh', background:'var(--casino-dark)', display:'flex', alignItems:'center', justifyContent:'center' }}>

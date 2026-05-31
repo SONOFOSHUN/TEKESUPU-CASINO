@@ -17,7 +17,7 @@ const PAYOUTS: Record<string, number> = {
 
 export default function TragamondasPage() {
   const router = useRouter()
-  const { profile, loading: authLoading, refresh: refreshProfile } = useAuth()
+  const { profile, loading: authLoading, isAuthenticated, refresh: refreshProfile } = useAuth()
   const [limites, setLimites] = useState<LimiteUsuario | null>(null)
   const [gastadoHoy, setGastadoHoy] = useState(0)
   const [reels, setReels] = useState(['🎰', '🎰', '🎰'])
@@ -48,7 +48,7 @@ export default function TragamondasPage() {
     }
     fetchData()
     return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
-  }, [profile, router])
+  }, [profile])
 
   const handleSpin = async () => {
     const amt = parseFloat(betAmount)
@@ -181,11 +181,13 @@ export default function TragamondasPage() {
     setResult({ won, gain: gained, bet: amt, reels: finalReels })
   }
 
-  if (authLoading || !profile) return (
+  if (authLoading) return (
     <div style={{ minHeight:'100vh', background:'var(--casino-dark)', display:'flex', alignItems:'center', justifyContent:'center' }}>
       <span className="spinner" />
     </div>
   )
+  if (!isAuthenticated) { router.push('/auth/login'); return null }
+  if (!profile) return null
 
   return (
     <div style={{ minHeight:'100vh', background:'var(--casino-dark)' }}>

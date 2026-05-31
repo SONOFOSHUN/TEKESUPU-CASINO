@@ -10,7 +10,7 @@ import UMLBadge from '@/components/UMLBadge'
 
 export default function DeportesPage() {
   const router = useRouter()
-  const { profile, loading: authLoading, refresh: refreshProfile } = useAuth()
+  const { profile, loading: authLoading, isAuthenticated, refresh: refreshProfile } = useAuth()
   const [limites, setLimites] = useState<LimiteUsuario | null>(null)
   const [eventos, setEventos] = useState<EventoDeportivo[]>([])
   const [gastadoHoy, setGastadoHoy] = useState(0)
@@ -47,7 +47,7 @@ export default function DeportesPage() {
       }
     }
     fetchData()
-  }, [profile, router])
+  }, [profile])
 
   const handleBet = async () => {
     const amt = parseFloat(betAmount)
@@ -137,11 +137,13 @@ export default function DeportesPage() {
     setResult({ won, gain, bet: amt, odds: selectedOdd.odds, pick: selectedOdd.label, evento: selectedEvento })
   }
 
-  if (authLoading || !profile) return (
+  if (authLoading) return (
     <div style={{ minHeight:'100vh', background:'var(--casino-dark)', display:'flex', alignItems:'center', justifyContent:'center' }}>
       <span className="spinner" />
     </div>
   )
+  if (!isAuthenticated) { router.push('/auth/login'); return null }
+  if (!profile) return null
 
   return (
     <div style={{ minHeight:'100vh', background:'var(--casino-dark)' }}>
