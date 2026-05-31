@@ -21,12 +21,13 @@ export default function DashboardPage() {
     if (authLoading) return
 
     // Solo redirigir a login si NO hay sesión activa (evita redirect loop con middleware)
-    if (!isAuthenticated) {
-      router.push('/auth/login')
-      return
-    }
-
     const fetchData = async () => {
+      if (!isAuthenticated) {
+        setLoading(false)
+        router.replace('/auth/login')
+        return
+      }
+
       if (!profile) {
         setLoading(false)
         return

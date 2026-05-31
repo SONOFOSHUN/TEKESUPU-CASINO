@@ -17,11 +17,13 @@ export default function HistorialPage() {
 
   useEffect(() => {
     if (authLoading) return
-    if (!isAuthenticated) {
-      router.push('/auth/login')
-      return
-    }
     const fetchData = async () => {
+      if (!isAuthenticated) {
+        setLoading(false)
+        router.replace('/auth/login')
+        return
+      }
+
       if (!profile) { setLoading(false); return }
       const supabase = createClient()
 

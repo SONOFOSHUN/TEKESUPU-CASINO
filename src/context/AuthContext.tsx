@@ -3,6 +3,25 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 import { createClient } from '@/lib/supabase/client'
 import { Profile } from '@/lib/types'
 
+const AUTH_TIMEOUT_MS = 7000
+
+function withTimeout<T>(promise: PromiseLike<T>, message: string) {
+  return new Promise<T>((resolve, reject) => {
+    const timeout = setTimeout(() => reject(new Error(message)), AUTH_TIMEOUT_MS)
+
+    promise.then(
+      value => {
+        clearTimeout(timeout)
+        resolve(value)
+      },
+      error => {
+        clearTimeout(timeout)
+        reject(error)
+      }
+    )
+  })
+}
+
 interface AuthContextType {
   profile: Profile | null
   loading: boolean
@@ -23,11 +42,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   const fetchProfile = useCallback(async () => {
+    const supabase = createClient()
+
     try {
-      const supabase = createClient()
-      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      const { data: { user }, error: userError } = await withTimeout(
+        supabase.auth.getUser(),
+        'La verificacion de sesion demoro demasiado'
+      )
 
       if (userError || !user) {
+        await supabase.auth.signOut({ scope: 'local' }).catch(() => undefined)
         setProfile(null)
         setIsAuthenticated(false)
         return
@@ -35,11 +59,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setIsAuthenticated(true)
 
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
+      const { data } = await withTimeout(
+        supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single(),
+        'La carga del perfil demoro demasiado'
+      )
 
       if (!data) {
         // Perfil no existe — intenta crearlo desde user_metadata (fallback de registro fallido)
@@ -65,7 +92,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (err) {
       console.error('AuthContext error:', err)
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => undefined)
       setProfile(null)
+      setIsAuthenticated(false)
     } finally {
       setLoading(false)
     }
@@ -74,28 +103,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const supabase = createClient()
 
-    // Safety timeout — si fetchProfile cuelga, liberar el loading igualmente
-    const timeout = setTimeout(() => setLoading(false), 8000)
-
-    void fetchProfile().finally(() => clearTimeout(timeout)) // eslint-disable-line react-hooks/set-state-in-effect
+    // Run outside the auth callback tick to avoid stale-session deadlocks.
+    const initialLoad = setTimeout(() => {
+      void fetchProfile()
+    }, 0)
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
-          await fetchProfile()
-        } else if (event === 'SIGNED_OUT') {
+      (event, session) => {
+        if (event === 'SIGNED_OUT') {
           setProfile(null)
           setIsAuthenticated(false)
           setLoading(false)
-        } else if (event === 'TOKEN_REFRESHED') {
-          await fetchProfile()
+        } else if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED')) {
+          setTimeout(() => {
+            void fetchProfile()
+          }, 0)
         }
       }
     )
 
     return () => {
       subscription.unsubscribe()
-      clearTimeout(timeout)
+      clearTimeout(initialLoad)
     }
   }, [fetchProfile])
 
