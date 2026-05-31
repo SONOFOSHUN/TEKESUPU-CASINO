@@ -22,8 +22,8 @@ export default function SaldoPage() {
       router.push('/auth/login')
       return
     }
-    if (!profile) { setLoading(false); return }
     const fetchData = async () => {
+      if (!profile) { setLoading(false); return }
       const supabase = createClient()
 
       setSaldo(Number(profile.saldo_virtual))
@@ -45,27 +45,20 @@ export default function SaldoPage() {
     const amt = parseFloat(depositAmt)
     if (!amt || amt <= 0 || !profile) return
 
-    if (amt > 10000) {
-      setMsg('❌ El monto máximo de recarga es S/ 10,000')
-      return
-    }
-    if (amt < 1) {
-      setMsg('❌ El monto mínimo de recarga es S/ 1')
-      return
-    }
+    const res = await fetch('/api/saldo/recargar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ monto: amt }),
+    })
+    const data = await res.json()
 
-    const nuevoSaldo = saldo + amt
-    const supabase = createClient()
-
-    const { error } = await supabase
-      .from('profiles')
-      .update({ saldo_virtual: nuevoSaldo })
-      .eq('id', profile.id)
-
-    if (!error) {
-      setSaldo(nuevoSaldo)
+    if (res.ok) {
+      setSaldo(data.nuevoSaldo)
       setMsg(`✅ +S/ ${amt.toFixed(2)} añadidos a tu saldo virtual`)
       setDepositAmt('')
+      setTimeout(() => setMsg(''), 3000)
+    } else {
+      setMsg(`❌ ${data.error || 'Error al recargar'}`)
       setTimeout(() => setMsg(''), 3000)
     }
   }

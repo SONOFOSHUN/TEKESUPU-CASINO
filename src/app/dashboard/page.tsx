@@ -26,13 +26,11 @@ export default function DashboardPage() {
       return
     }
 
-    if (!profile) {
-      // Usuario autenticado pero sin perfil — esperar a que AuthContext lo cree
-      setLoading(false)
-      return
-    }
-
     const fetchData = async () => {
+      if (!profile) {
+        setLoading(false)
+        return
+      }
       try {
         const supabase = createClient()
 

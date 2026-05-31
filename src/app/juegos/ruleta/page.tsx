@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { LimiteUsuario } from '@/lib/types'
+// createClient se mantiene para fetchData de límites locales
 import Navbar from '@/components/Navbar'
 import { useAuth } from '@/context/AuthContext'
 import UMLBadge from '@/components/UMLBadge'
@@ -25,7 +26,6 @@ export default function RuletaPage() {
   const router = useRouter()
   const { profile, loading: authLoading, isAuthenticated, refresh: refreshProfile } = useAuth()
   const [limites, setLimites] = useState<LimiteUsuario | null>(null)
-  const [gastadoHoy, setGastadoHoy] = useState(0)
   const [betType, setBetType] = useState('')
   const [betNumber, setBetNumber] = useState('')
   const [betAmount, setBetAmount] = useState('')
@@ -45,13 +45,6 @@ export default function RuletaPage() {
         .from('limites_usuario').select('*').eq('usuario_id', profile.id).single()
       if (limitesData) setLimites(limitesData)
 
-      const hoy = new Date(); hoy.setHours(0,0,0,0)
-      const { data: apuestasHoy } = await supabase
-        .from('apuestas').select('monto').eq('usuario_id', profile.id)
-        .gte('created_at', hoy.toISOString())
-      if (apuestasHoy) {
-        setGastadoHoy(apuestasHoy.reduce((acc, a) => acc + Number(a.monto), 0))
-      }
     }
     fetchData()
   }, [profile])
@@ -64,112 +57,39 @@ export default function RuletaPage() {
     setLimitError('')
     setError('')
     setResult(null)
-
-    const supabase = createClient()
-
-    // <<include>> Verificar saldo
-    setChecking('saldo')
-    await new Promise(r => setTimeout(r, 800))
-    if (amt > Number(profile.saldo_virtual)) {
-      setError('Saldo insuficiente para realizar esta apuesta.')
-      setChecking('')
-      return
-    }
-
-    // <<include>> Verificar límites de uso
-    setChecking('limite')
-    await new Promise(r => setTimeout(r, 600))
-    const limiteDiario = limites?.limite_diario || 500
-    if (gastadoHoy + amt > limiteDiario) {
-      setLimitError('diario')
-      setChecking('')
-      return
-    }
-
-    // Verificar límites semanal y mensual
-    const semana = new Date()
-    semana.setDate(semana.getDate() - 7)
-    const { data: apuestasSemana } = await supabase
-      .from('apuestas').select('monto')
-      .eq('usuario_id', profile.id)
-      .gte('created_at', semana.toISOString())
-    const gastadoSemana = apuestasSemana?.reduce((acc, a) => acc + Number(a.monto), 0) || 0
-
-    const mes = new Date(); mes.setDate(1); mes.setHours(0,0,0,0)
-    const { data: apuestasMes } = await supabase
-      .from('apuestas').select('monto')
-      .eq('usuario_id', profile.id)
-      .gte('created_at', mes.toISOString())
-    const gastadoMes = apuestasMes?.reduce((acc, a) => acc + Number(a.monto), 0) || 0
-
-    if (gastadoSemana + amt > (limites?.limite_semanal || 2000)) {
-      setLimitError('semanal')
-      setChecking('')
-      return
-    }
-    if (gastadoMes + amt > (limites?.limite_mensual || 6000)) {
-      setLimitError('mensual')
-      setChecking('')
-      return
-    }
-
-    setChecking('')
     setSpinning(true)
+    setChecking('saldo')
 
-    // Animar rueda y calcular resultado basado en rotación real
+    // Animación cosmética y llamada al API en paralelo
     const newRot = rotation + 1440 + Math.random() * 720
     setRotation(newRot)
-    await new Promise(r => setTimeout(r, 4200))
 
-    // El indicador está arriba (top = 270° en coordenadas SVG que empieza a la derecha)
-    // Normalizamos la rotación acumulada a 0-360
-    const totalSegments = ROULETTE.length
-    const degreesPerSegment = 360 / totalSegments
-    const normalizedRotation = ((newRot % 360) + 360) % 360
-    const indicatorAngle = (360 - normalizedRotation + 270) % 360
-    const segmentIndex = Math.floor(indicatorAngle / degreesPerSegment) % totalSegments
-    const seg = ROULETTE[segmentIndex]
-
-    let won = false
-    let multiplier = 2
-    if (betType === 'Número específico' && parseInt(betNumber) === seg.n) { won = true; multiplier = 35 }
-    else if (betType === 'Rojo' && seg.c === 'red') won = true
-    else if (betType === 'Negro' && seg.c === 'black') won = true
-    else if (betType === 'Par' && seg.n % 2 === 0 && seg.n !== 0) won = true
-    else if (betType === 'Impar' && seg.n % 2 !== 0) won = true
-
-    const gain = won ? amt * multiplier : 0
-    const nuevoSaldo = won
-      ? Number(profile.saldo_virtual) + gain - amt
-      : Number(profile.saldo_virtual) - amt
-
-    // Guardar en Supabase
-    const { error: errorApuesta } = await supabase.from('apuestas').insert({
-      usuario_id: profile.id,
-      juego: 'ruleta',
-      tipo_apuesta: betType === 'Número específico' ? `Número ${betNumber}` : betType,
-      monto: amt,
-      ganancia: gain,
-      resultado: won ? 'gano' : 'perdio'
+    const tipo = betType === 'Número específico' ? `Número ${betNumber}` : betType
+    const apiCall = fetch('/api/apuesta', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ juego: 'ruleta', tipo_apuesta: tipo, monto: amt, betNumber }),
     })
-    if (errorApuesta) {
-      setError('Error al guardar la apuesta. Intenta de nuevo.')
-      setSpinning(false)
-      return
-    }
-    const { error: errorSaldo } = await supabase.from('profiles')
-      .update({ saldo_virtual: nuevoSaldo })
-      .eq('id', profile.id)
-    if (errorSaldo) {
-      setError('Error al actualizar el saldo. Contacta soporte.')
-      setSpinning(false)
+    const animDelay = new Promise(r => setTimeout(r, 4200))
+
+    setChecking('limite')
+    const [res] = await Promise.all([apiCall, animDelay])
+    setChecking('')
+    setSpinning(false)
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      if (data.error === 'LIMIT') {
+        setLimitError(data.limitType)
+      } else {
+        setError(data.error || 'Error al procesar la apuesta.')
+      }
       return
     }
 
     await refreshProfile()
-    setGastadoHoy(g => g + amt)
-    setResult({ number: seg.n, color: seg.c, won, gain, bet: amt, type: betType })
-    setSpinning(false)
+    setResult({ number: data.segNumber, color: data.segColor, won: data.won, gain: data.gain, bet: amt, type: betType })
   }
 
   if (authLoading) return (

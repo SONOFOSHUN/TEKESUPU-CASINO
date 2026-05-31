@@ -24,8 +24,8 @@ export default function LimitesPage() {
       router.push('/auth/login')
       return
     }
-    if (!profile) { setLoading(false); return }
     const fetchData = async () => {
+      if (!profile) { setLoading(false); return }
       const supabase = createClient()
 
       const { data: limitesData } = await supabase

@@ -105,7 +105,7 @@ export default function UsuariosAdminPage() {
   }
 
   useEffect(() => {
-    fetchUsuarios()
+    void fetchUsuarios() // eslint-disable-line react-hooks/set-state-in-effect
 
     const supabase = createClient()
     const channel = supabase.channel('usuarios-admin')

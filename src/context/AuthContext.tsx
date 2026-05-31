@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setIsAuthenticated(true)
 
-      const { data, error: profileError } = await supabase
+      const { data } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
@@ -50,8 +50,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             id: user.id,
             nombre: meta.nombre || user.email?.split('@')[0] || 'Usuario',
             dni: meta.dni || '00000000',
-            rol: meta.rol || 'usuario',
-            tiene_ludopatia: meta.tiene_ludopatia ?? false,
+            rol: 'usuario',
+            tiene_ludopatia: false,
             saldo_virtual: 1000,
           }, { onConflict: 'id' })
           .select()
@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Safety timeout — si fetchProfile cuelga, liberar el loading igualmente
     const timeout = setTimeout(() => setLoading(false), 8000)
 
-    void fetchProfile().finally(() => clearTimeout(timeout))
+    void fetchProfile().finally(() => clearTimeout(timeout)) // eslint-disable-line react-hooks/set-state-in-effect
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {

@@ -13,7 +13,6 @@ export default function DeportesPage() {
   const { profile, loading: authLoading, isAuthenticated, refresh: refreshProfile } = useAuth()
   const [limites, setLimites] = useState<LimiteUsuario | null>(null)
   const [eventos, setEventos] = useState<EventoDeportivo[]>([])
-  const [gastadoHoy, setGastadoHoy] = useState(0)
   const [selectedEvento, setSelectedEvento] = useState<EventoDeportivo | null>(null)
   const [selectedOdd, setSelectedOdd] = useState<{label: string, odds: number} | null>(null)
   const [betAmount, setBetAmount] = useState('')
@@ -38,13 +37,6 @@ export default function DeportesPage() {
         .order('fecha_evento', { ascending: true })
       if (eventosData) setEventos(eventosData)
 
-      const hoy = new Date(); hoy.setHours(0,0,0,0)
-      const { data: apuestasHoy } = await supabase
-        .from('apuestas').select('monto').eq('usuario_id', profile.id)
-        .gte('created_at', hoy.toISOString())
-      if (apuestasHoy) {
-        setGastadoHoy(apuestasHoy.reduce((acc, a) => acc + Number(a.monto), 0))
-      }
     }
     fetchData()
   }, [profile])
@@ -55,86 +47,29 @@ export default function DeportesPage() {
 
     setLimitError('')
     setError('')
-
-    const supabase = createClient()
-
-    // <<include>> Verificar saldo
     setChecking('saldo')
-    await new Promise(r => setTimeout(r, 700))
-    if (amt > Number(profile.saldo_virtual)) {
-      setError('Saldo insuficiente.')
-      setChecking('')
-      return
-    }
 
-    // <<include>> Verificar límites
-    setChecking('limite')
-    await new Promise(r => setTimeout(r, 500))
-    const limiteDiario = limites?.limite_diario || 500
-    if (gastadoHoy + amt > limiteDiario) {
-      setLimitError('diario')
-      setChecking('')
-      return
-    }
-
-    // Verificar límites semanal y mensual
-    const semana = new Date()
-    semana.setDate(semana.getDate() - 7)
-    const { data: apuestasSemana } = await supabase
-      .from('apuestas').select('monto')
-      .eq('usuario_id', profile.id)
-      .gte('created_at', semana.toISOString())
-    const gastadoSemana = apuestasSemana?.reduce((acc, a) => acc + Number(a.monto), 0) || 0
-
-    const mes = new Date(); mes.setDate(1); mes.setHours(0,0,0,0)
-    const { data: apuestasMes } = await supabase
-      .from('apuestas').select('monto')
-      .eq('usuario_id', profile.id)
-      .gte('created_at', mes.toISOString())
-    const gastadoMes = apuestasMes?.reduce((acc, a) => acc + Number(a.monto), 0) || 0
-
-    if (gastadoSemana + amt > (limites?.limite_semanal || 2000)) {
-      setLimitError('semanal')
-      setChecking('')
-      return
-    }
-    if (gastadoMes + amt > (limites?.limite_mensual || 6000)) {
-      setLimitError('mensual')
-      setChecking('')
-      return
-    }
-    setChecking('')
-
-    // Simular resultado (45% chance de ganar)
-    const won = Math.random() < 0.45
-    const gain = won ? Math.round(amt * selectedOdd.odds * 100) / 100 : 0
-    const nuevoSaldo = won
-      ? Number(profile.saldo_virtual) + gain - amt
-      : Number(profile.saldo_virtual) - amt
-
-    const { error: errorApuesta } = await supabase.from('apuestas').insert({
-      usuario_id: profile.id,
-      juego: 'deportes',
-      tipo_apuesta: `${selectedEvento.equipo_local} vs ${selectedEvento.equipo_visitante} — ${selectedOdd.label}`,
-      monto: amt,
-      ganancia: gain,
-      resultado: won ? 'gano' : 'perdio'
+    const tipo = `${selectedEvento.equipo_local} vs ${selectedEvento.equipo_visitante} — ${selectedOdd.label}`
+    const res = await fetch('/api/apuesta', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ juego: 'deportes', tipo_apuesta: tipo, monto: amt, odds: selectedOdd.odds }),
     })
-    if (errorApuesta) {
-      setError('Error al guardar la apuesta. Intenta de nuevo.')
-      return
-    }
-    const { error: errorSaldo } = await supabase.from('profiles')
-      .update({ saldo_virtual: nuevoSaldo })
-      .eq('id', profile.id)
-    if (errorSaldo) {
-      setError('Error al actualizar el saldo. Contacta soporte.')
+
+    setChecking('')
+    const data = await res.json()
+
+    if (!res.ok) {
+      if (data.error === 'LIMIT') {
+        setLimitError(data.limitType)
+      } else {
+        setError(data.error || 'Error al procesar la apuesta.')
+      }
       return
     }
 
     await refreshProfile()
-    setGastadoHoy(g => g + amt)
-    setResult({ won, gain, bet: amt, odds: selectedOdd.odds, pick: selectedOdd.label, evento: selectedEvento })
+    setResult({ won: data.won, gain: data.gain, bet: amt, odds: selectedOdd.odds, pick: selectedOdd.label, evento: selectedEvento })
   }
 
   if (authLoading) return (

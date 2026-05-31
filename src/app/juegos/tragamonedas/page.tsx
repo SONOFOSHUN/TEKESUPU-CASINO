@@ -10,16 +10,11 @@ import UMLBadge from '@/components/UMLBadge'
 
 const SYMBOLS = ['🍒', '🍋', '💎', '🔔', '7️⃣', '⭐', '🍀', '🎰']
 
-const PAYOUTS: Record<string, number> = {
-  '💎': 15, '7️⃣': 12, '🔔': 10, '⭐': 8,
-  '🍀': 6, '🎰': 5, '🍒': 3, '🍋': 2
-}
 
 export default function TragamondasPage() {
   const router = useRouter()
   const { profile, loading: authLoading, isAuthenticated, refresh: refreshProfile } = useAuth()
   const [limites, setLimites] = useState<LimiteUsuario | null>(null)
-  const [gastadoHoy, setGastadoHoy] = useState(0)
   const [reels, setReels] = useState(['🎰', '🎰', '🎰'])
   const [spinning, setSpinning] = useState(false)
   const [betAmount, setBetAmount] = useState('')
@@ -38,13 +33,6 @@ export default function TragamondasPage() {
         .from('limites_usuario').select('*').eq('usuario_id', profile.id).single()
       if (limitesData) setLimites(limitesData)
 
-      const hoy = new Date(); hoy.setHours(0,0,0,0)
-      const { data: apuestasHoy } = await supabase
-        .from('apuestas').select('monto').eq('usuario_id', profile.id)
-        .gte('created_at', hoy.toISOString())
-      if (apuestasHoy) {
-        setGastadoHoy(apuestasHoy.reduce((acc, a) => acc + Number(a.monto), 0))
-      }
     }
     fetchData()
     return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
@@ -57,59 +45,10 @@ export default function TragamondasPage() {
     setLimitError('')
     setError('')
     setResult(null)
-
-    const supabase = createClient()
-
-    // <<include>> Verificar saldo
-    setChecking('saldo')
-    await new Promise(r => setTimeout(r, 700))
-    if (amt > Number(profile.saldo_virtual)) {
-      setError('Saldo insuficiente.')
-      setChecking('')
-      return
-    }
-
-    // <<include>> Verificar límites
-    setChecking('limite')
-    await new Promise(r => setTimeout(r, 500))
-    const limiteDiario = limites?.limite_diario || 500
-    if (gastadoHoy + amt > limiteDiario) {
-      setLimitError('diario')
-      setChecking('')
-      return
-    }
-
-    // Verificar límites semanal y mensual
-    const semana = new Date()
-    semana.setDate(semana.getDate() - 7)
-    const { data: apuestasSemana } = await supabase
-      .from('apuestas').select('monto')
-      .eq('usuario_id', profile.id)
-      .gte('created_at', semana.toISOString())
-    const gastadoSemana = apuestasSemana?.reduce((acc, a) => acc + Number(a.monto), 0) || 0
-
-    const mes = new Date(); mes.setDate(1); mes.setHours(0,0,0,0)
-    const { data: apuestasMes } = await supabase
-      .from('apuestas').select('monto')
-      .eq('usuario_id', profile.id)
-      .gte('created_at', mes.toISOString())
-    const gastadoMes = apuestasMes?.reduce((acc, a) => acc + Number(a.monto), 0) || 0
-
-    if (gastadoSemana + amt > (limites?.limite_semanal || 2000)) {
-      setLimitError('semanal')
-      setChecking('')
-      return
-    }
-    if (gastadoMes + amt > (limites?.limite_mensual || 6000)) {
-      setLimitError('mensual')
-      setChecking('')
-      return
-    }
-
-    setChecking('')
     setSpinning(true)
+    setChecking('saldo')
 
-    // Animar rodillos
+    // Animación de rodillos y llamada al API en paralelo
     let count = 0
     intervalRef.current = setInterval(() => {
       setReels([
@@ -121,64 +60,37 @@ export default function TragamondasPage() {
       if (count > 25) clearInterval(intervalRef.current!)
     }, 80)
 
-    await new Promise(r => setTimeout(r, 2200))
-
-    // Resultado final
-    const win = Math.random() < 0.3
-    let finalReels: string[]
-
-    if (win) {
-      const sym = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)]
-      finalReels = [sym, sym, sym]
-    } else {
-      // Asegurar que no sean 3 iguales
-      do {
-        finalReels = [
-          SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
-          SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
-          SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
-        ]
-      } while (finalReels[0] === finalReels[1] && finalReels[1] === finalReels[2])
-    }
-
-    setReels(finalReels)
-    setSpinning(false)
-
-    const allEqual = finalReels[0] === finalReels[1] && finalReels[1] === finalReels[2]
-    const twoEqual = !allEqual && (finalReels[0] === finalReels[1] || finalReels[1] === finalReels[2] || finalReels[0] === finalReels[2])
-    const multiplier = allEqual ? (PAYOUTS[finalReels[0]] || 5) : twoEqual ? 2 : 0
-    const gained = allEqual || twoEqual ? amt * multiplier : 0
-    const won = gained > 0
-
-    const nuevoSaldo = won
-      ? Number(profile.saldo_virtual) + gained - amt
-      : Number(profile.saldo_virtual) - amt
-
-    const { error: errorApuesta } = await supabase.from('apuestas').insert({
-      usuario_id: profile.id,
-      juego: 'tragamonedas',
-      tipo_apuesta: allEqual ? `3x ${finalReels[0]}` : twoEqual ? '2x iguales' : 'Sin combinación',
-      monto: amt,
-      ganancia: gained,
-      resultado: won ? 'gano' : 'perdio'
+    const apiCall = fetch('/api/apuesta', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ juego: 'tragamonedas', tipo_apuesta: 'spin', monto: amt }),
     })
-    if (errorApuesta) {
-      setError('Error al guardar la apuesta. Intenta de nuevo.')
+    const animDelay = new Promise(r => setTimeout(r, 2200))
+
+    setChecking('limite')
+    const [res] = await Promise.all([apiCall, animDelay])
+
+    clearInterval(intervalRef.current!)
+    setChecking('')
+
+    const data = await res.json()
+
+    if (!res.ok) {
       setSpinning(false)
-      return
-    }
-    const { error: errorSaldo } = await supabase.from('profiles')
-      .update({ saldo_virtual: nuevoSaldo })
-      .eq('id', profile.id)
-    if (errorSaldo) {
-      setError('Error al actualizar el saldo. Contacta soporte.')
-      setSpinning(false)
+      setReels(['🎰', '🎰', '🎰'])
+      if (data.error === 'LIMIT') {
+        setLimitError(data.limitType)
+      } else {
+        setError(data.error || 'Error al procesar la apuesta.')
+      }
       return
     }
 
+    // Mostrar resultado del servidor
+    setReels(data.reels)
+    setSpinning(false)
     await refreshProfile()
-    setGastadoHoy(g => g + amt)
-    setResult({ won, gain: gained, bet: amt, reels: finalReels })
+    setResult({ won: data.won, gain: data.gain, bet: amt, reels: data.reels })
   }
 
   if (authLoading) return (

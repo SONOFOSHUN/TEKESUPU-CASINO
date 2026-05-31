@@ -140,7 +140,7 @@ export function useRealtimeStats() {
   }
 
   useEffect(() => {
-    fetchStats()
+    void fetchStats() // eslint-disable-line react-hooks/set-state-in-effect
     const supabase = createClient()
 
     // Suscripción realtime a apuestas
