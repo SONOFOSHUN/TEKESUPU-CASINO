@@ -9,7 +9,7 @@ import UMLBadge from '@/components/UMLBadge'
 
 export default function LimitesPage() {
   const router = useRouter()
-  const { profile, loading: authLoading } = useAuth()
+  const { profile, loading: authLoading, isAuthenticated } = useAuth()
   const [limites, setLimites] = useState<LimiteUsuario | null>(null)
   const [gastadoHoy, setGastadoHoy] = useState(0)
   const [gastadoSemana, setGastadoSemana] = useState(0)
@@ -20,10 +20,11 @@ export default function LimitesPage() {
 
   useEffect(() => {
     if (authLoading) return
-    if (!profile) {
+    if (!isAuthenticated) {
       router.push('/auth/login')
       return
     }
+    if (!profile) { setLoading(false); return }
     const fetchData = async () => {
       const supabase = createClient()
 
@@ -57,7 +58,7 @@ export default function LimitesPage() {
       setLoading(false)
     }
     fetchData()
-  }, [profile, authLoading, router])
+  }, [profile, authLoading, isAuthenticated, router])
 
   const handleSave = async () => {
     if (!profile || !limites) return

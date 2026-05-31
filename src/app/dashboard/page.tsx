@@ -10,7 +10,7 @@ import UMLBadge from '@/components/UMLBadge'
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { profile, loading: authLoading } = useAuth()
+  const { profile, loading: authLoading, isAuthenticated } = useAuth()
   const [apuestas, setApuestas] = useState<Apuesta[]>([])
   const [limites, setLimites] = useState<LimiteUsuario | null>(null)
   const [gastadoHoy, setGastadoHoy] = useState(0)
@@ -20,8 +20,15 @@ export default function DashboardPage() {
   useEffect(() => {
     if (authLoading) return
 
-    if (!profile) {
+    // Solo redirigir a login si NO hay sesión activa (evita redirect loop con middleware)
+    if (!isAuthenticated) {
       router.push('/auth/login')
+      return
+    }
+
+    if (!profile) {
+      // Usuario autenticado pero sin perfil — esperar a que AuthContext lo cree
+      setLoading(false)
       return
     }
 
@@ -75,7 +82,7 @@ export default function DashboardPage() {
     const handleFocus = () => fetchData()
     window.addEventListener('focus', handleFocus)
     return () => window.removeEventListener('focus', handleFocus)
-  }, [profile, authLoading, router])
+  }, [profile, authLoading, isAuthenticated, router])
 
   if (authLoading || loading) {
     return (

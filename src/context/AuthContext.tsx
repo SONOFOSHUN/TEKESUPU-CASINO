@@ -6,18 +6,21 @@ import { Profile } from '@/lib/types'
 interface AuthContextType {
   profile: Profile | null
   loading: boolean
+  isAuthenticated: boolean
   refresh: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType>({
   profile: null,
   loading: true,
+  isAuthenticated: false,
   refresh: async () => {},
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   const fetchProfile = useCallback(async () => {
     try {
@@ -26,8 +29,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (userError || !user) {
         setProfile(null)
+        setIsAuthenticated(false)
         return
       }
+
+      setIsAuthenticated(true)
 
       const { data, error: profileError } = await supabase
         .from('profiles')
@@ -79,6 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await fetchProfile()
         } else if (event === 'SIGNED_OUT') {
           setProfile(null)
+          setIsAuthenticated(false)
           setLoading(false)
         } else if (event === 'TOKEN_REFRESHED') {
           await fetchProfile()
@@ -93,7 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [fetchProfile])
 
   return (
-    <AuthContext.Provider value={{ profile, loading, refresh: fetchProfile }}>
+    <AuthContext.Provider value={{ profile, loading, isAuthenticated, refresh: fetchProfile }}>
       {children}
     </AuthContext.Provider>
   )

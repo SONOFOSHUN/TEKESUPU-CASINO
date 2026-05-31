@@ -9,7 +9,7 @@ import UMLBadge from '@/components/UMLBadge'
 
 export default function SaldoPage() {
   const router = useRouter()
-  const { profile, loading: authLoading } = useAuth()
+  const { profile, loading: authLoading, isAuthenticated } = useAuth()
   const [apuestas, setApuestas] = useState<Apuesta[]>([])
   const [loading, setLoading] = useState(true)
   const [depositAmt, setDepositAmt] = useState('')
@@ -18,10 +18,11 @@ export default function SaldoPage() {
 
   useEffect(() => {
     if (authLoading) return
-    if (!profile) {
+    if (!isAuthenticated) {
       router.push('/auth/login')
       return
     }
+    if (!profile) { setLoading(false); return }
     const fetchData = async () => {
       const supabase = createClient()
 
@@ -38,7 +39,7 @@ export default function SaldoPage() {
       setLoading(false)
     }
     fetchData()
-  }, [profile, authLoading, router])
+  }, [profile, authLoading, isAuthenticated, router])
 
   const handleDeposit = async () => {
     const amt = parseFloat(depositAmt)
