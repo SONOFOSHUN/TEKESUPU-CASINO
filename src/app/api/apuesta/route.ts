@@ -45,9 +45,7 @@ export async function POST(req: NextRequest) {
     const { data: profile } = await admin
       .from('profiles').select('saldo_virtual').eq('id', user.id).single()
     if (!profile) return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 })
-    if (monto > Number(profile.saldo_virtual)) {
-      return NextResponse.json({ error: 'Saldo insuficiente' }, { status: 400 })
-    }
+    // Nota: el RPC realizar_apuesta también valida saldo con bloqueo de fila (FOR UPDATE)
 
     // Verificar límites (diario, semanal, mensual)
     const { data: limites } = await admin
@@ -126,16 +124,20 @@ export async function POST(req: NextRequest) {
       ? Number(profile.saldo_virtual) + gain - monto
       : Number(profile.saldo_virtual) - monto
 
-    // 4. Guardar apuesta y actualizar saldo en paralelo
-    const [{ error: errApuesta }, { error: errSaldo }] = await Promise.all([
-      admin.from('apuestas').insert({
-        usuario_id: user.id, juego, tipo_apuesta, monto, ganancia: gain,
-        resultado: won ? 'gano' : 'perdio'
-      }),
-      admin.from('profiles').update({ saldo_virtual: nuevoSaldo }).eq('id', user.id)
-    ])
+    // 4. Guardar con RPC transaccional (SELECT FOR UPDATE evita race conditions)
+    const { error: rpcError } = await admin.rpc('realizar_apuesta', {
+      p_usuario_id: user.id,
+      p_juego: juego,
+      p_tipo_apuesta: tipo_apuesta,
+      p_monto: monto,
+      p_ganancia: gain,
+      p_resultado: won ? 'gano' : 'perdio',
+    })
 
-    if (errApuesta || errSaldo) {
+    if (rpcError) {
+      if (rpcError.message?.includes('SALDO_INSUFICIENTE')) {
+        return NextResponse.json({ error: 'Saldo insuficiente' }, { status: 400 })
+      }
       return NextResponse.json({ error: 'Error guardando resultado' }, { status: 500 })
     }
 

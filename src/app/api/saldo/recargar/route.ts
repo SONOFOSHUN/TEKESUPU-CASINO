@@ -25,14 +25,17 @@ export async function POST(req: NextRequest) {
       process.env.SUPABASE_SECRET_KEY!
     )
 
-    const { data: profile } = await admin
-      .from('profiles').select('saldo_virtual').eq('id', user.id).single()
-    if (!profile) return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 })
-
-    const nuevoSaldo = Number(profile.saldo_virtual) + monto
-    const { error } = await admin
-      .from('profiles').update({ saldo_virtual: nuevoSaldo }).eq('id', user.id)
-    if (error) return NextResponse.json({ error: 'Error actualizando saldo' }, { status: 500 })
+    // RPC transaccional: UPDATE atómico con bloqueo de fila
+    const { data: nuevoSaldo, error } = await admin.rpc('recargar_saldo', {
+      p_usuario_id: user.id,
+      p_monto: monto,
+    })
+    if (error) {
+      if (error.message?.includes('PERFIL_NO_ENCONTRADO')) {
+        return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 })
+      }
+      return NextResponse.json({ error: 'Error actualizando saldo' }, { status: 500 })
+    }
 
     return NextResponse.json({ nuevoSaldo })
   } catch {
