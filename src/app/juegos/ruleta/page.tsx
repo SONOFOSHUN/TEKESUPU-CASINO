@@ -21,6 +21,25 @@ const ROULETTE = [
 ]
 
 const BET_TYPES = ['Rojo', 'Negro', 'Par', 'Impar', 'Número específico']
+const ROULETTE_POINTER_ANGLE = 270
+const ROULETTE_SPIN_DURATION_MS = 4200
+
+function getTargetRotation(resultNumber: number, currentRotation: number) {
+  const segmentIndex = ROULETTE.findIndex(seg => seg.n === resultNumber)
+  if (segmentIndex === -1) return currentRotation + 1440
+
+  const segmentSize = 360 / ROULETTE.length
+  const segmentCenter = segmentIndex * segmentSize + segmentSize / 2
+  const desiredModulo = (ROULETTE_POINTER_ANGLE - segmentCenter + 360) % 360
+  let targetRotation = desiredModulo
+  const minimumRotation = currentRotation + 1440
+
+  while (targetRotation < minimumRotation) {
+    targetRotation += 360
+  }
+
+  return targetRotation
+}
 
 export default function RuletaPage() {
   const router = useRouter()
@@ -60,26 +79,19 @@ export default function RuletaPage() {
     setSpinning(true)
     setChecking('saldo')
 
-    // Animación cosmética y llamada al API en paralelo
-    const newRot = rotation + 1440 + Math.random() * 720
-    setRotation(newRot)
-
     const tipo = betType === 'Número específico' ? `Número ${betNumber}` : betType
-    const apiCall = fetch('/api/apuesta', {
+    setChecking('limite')
+    const res = await fetch('/api/apuesta', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ juego: 'ruleta', tipo_apuesta: tipo, monto: amt, betNumber }),
     })
-    const animDelay = new Promise(r => setTimeout(r, 4200))
-
-    setChecking('limite')
-    const [res] = await Promise.all([apiCall, animDelay])
     setChecking('')
-    setSpinning(false)
 
     const data = await res.json()
 
     if (!res.ok) {
+      setSpinning(false)
       if (data.error === 'LIMIT') {
         setLimitError(data.limitType)
       } else {
@@ -87,6 +99,11 @@ export default function RuletaPage() {
       }
       return
     }
+
+    const targetRotation = getTargetRotation(Number(data.segNumber), rotation)
+    setRotation(targetRotation)
+    await new Promise(r => setTimeout(r, ROULETTE_SPIN_DURATION_MS))
+    setSpinning(false)
 
     await refreshProfile()
     setResult({ number: data.segNumber, color: data.segColor, won: data.won, gain: data.gain, bet: amt, type: betType, nuevoSaldo: Number(data.nuevoSaldo) })
