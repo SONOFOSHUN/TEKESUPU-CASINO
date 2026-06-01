@@ -47,10 +47,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
 
-    // Landing con sesión → dashboard
-    if (user && pathname === '/') {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
-    }
+    // La landing (/) es accesible para todos, incluso autenticados
 
   } catch (error) {
     // Si falla el middleware, dejar pasar la request

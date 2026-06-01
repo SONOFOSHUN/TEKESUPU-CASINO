@@ -1,4 +1,7 @@
+'use client'
 import Link from 'next/link'
+import Navbar from '@/components/Navbar'
+import { useAuth } from '@/context/AuthContext'
 
 const FLOAT_SYMBOLS = [
   { sym: '♠', x: '4%',  delay: '0s',   dur: '18s', size: 56, opacity: 0.10 },
@@ -21,6 +24,8 @@ const TICKER_ITEMS = [
 ]
 
 export default function LandingPage() {
+  const { profile } = useAuth()
+
   return (
     <>
       <style>{`
@@ -150,25 +155,27 @@ export default function LandingPage() {
 
       <div style={{ background: '#07070F', color: '#EDE0C4', minHeight: '100vh', overflowX: 'hidden' }}>
 
-        {/* ── Navbar ─────────────────────────────────────────────── */}
-        <nav style={{
-          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200,
-          height: '60px', background: 'rgba(7,7,15,0.94)', backdropFilter: 'blur(24px)',
-          borderBottom: '1px solid rgba(200,0,0,0.15)',
-          display: 'flex', alignItems: 'center', padding: '0 24px', justifyContent: 'space-between',
-        }}>
-          <span className="font-cinzel" style={{ fontSize: '16px', fontWeight: 700, color: '#C9A227', letterSpacing: '1.5px' }}>
-            ♠ TEKESUPU ♣
-          </span>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <Link href="/auth/login">
-              <button className="btn-outline-land" style={{ padding: '7px 18px', fontSize: '11px' }}>Iniciar Sesión</button>
-            </Link>
-            <Link href="/auth/registro">
-              <button className="btn-red-land" style={{ padding: '7px 18px', fontSize: '11px' }}>Registrarse</button>
-            </Link>
-          </div>
-        </nav>
+        {/* ── Navbar: usa el componente real si hay sesión, minimalista si no ── */}
+        {profile ? <Navbar /> : (
+          <nav style={{
+            position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200,
+            height: '60px', background: 'rgba(7,7,15,0.94)', backdropFilter: 'blur(24px)',
+            borderBottom: '1px solid rgba(200,0,0,0.15)',
+            display: 'flex', alignItems: 'center', padding: '0 24px', justifyContent: 'space-between',
+          }}>
+            <span className="font-cinzel" style={{ fontSize: '16px', fontWeight: 700, color: '#C9A227', letterSpacing: '1.5px' }}>
+              ♠ TEKESUPU ♣
+            </span>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <Link href="/auth/login">
+                <button className="btn-outline-land" style={{ padding: '7px 18px', fontSize: '11px' }}>Iniciar Sesión</button>
+              </Link>
+              <Link href="/auth/registro">
+                <button className="btn-red-land" style={{ padding: '7px 18px', fontSize: '11px' }}>Registrarse</button>
+              </Link>
+            </div>
+          </nav>
+        )}
 
         {/* ── Hero ────────────────────────────────────────────────── */}
         <section style={{
