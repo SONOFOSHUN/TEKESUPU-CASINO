@@ -138,7 +138,22 @@ export async function POST(req: NextRequest) {
       if (rpcError.message?.includes('SALDO_INSUFICIENTE')) {
         return NextResponse.json({ error: 'Saldo insuficiente' }, { status: 400 })
       }
-      return NextResponse.json({ error: 'Error guardando resultado' }, { status: 500 })
+      // Fallback si la función RPC aún no existe en Supabase
+      if (rpcError.code === 'PGRST202' || rpcError.message?.includes('does not exist')) {
+        const nuevoSaldoFallback = won
+          ? Number(profile.saldo_virtual) + gain - monto
+          : Number(profile.saldo_virtual) - monto
+        const [{ error: e1 }, { error: e2 }] = await Promise.all([
+          admin.from('apuestas').insert({
+            usuario_id: user.id, juego, tipo_apuesta, monto, ganancia: gain,
+            resultado: won ? 'gano' : 'perdio'
+          }),
+          admin.from('profiles').update({ saldo_virtual: nuevoSaldoFallback }).eq('id', user.id)
+        ])
+        if (e1 || e2) return NextResponse.json({ error: 'Error guardando resultado' }, { status: 500 })
+      } else {
+        return NextResponse.json({ error: 'Error guardando resultado' }, { status: 500 })
+      }
     }
 
     return NextResponse.json({ won, gain, nuevoSaldo, ...extra })
