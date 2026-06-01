@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/context/AuthContext'
 
 const userLinks = [
-  { href: '/dashboard', label: 'Inicio' },
+  { href: '/dashboard', label: 'Dashboard' },
   { href: '/saldo', label: 'Saldo' },
   { href: '/juegos/ruleta', label: 'Ruleta' },
   { href: '/juegos/tragamonedas', label: 'Slots' },
