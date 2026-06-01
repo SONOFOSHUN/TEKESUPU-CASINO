@@ -19,7 +19,7 @@ export default function TragamondasPage() {
   const [spinning, setSpinning] = useState(false)
   const [betAmount, setBetAmount] = useState('')
   const [checking, setChecking] = useState('')
-  const [result, setResult] = useState<{won: boolean, gain: number, bet: number, reels: string[]} | null>(null)
+  const [result, setResult] = useState<{won: boolean, gain: number, bet: number, reels: string[], nuevoSaldo:number} | null>(null)
   const [limitError, setLimitError] = useState<string>('')
   const [error, setError] = useState('')
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -90,7 +90,7 @@ export default function TragamondasPage() {
     setReels(data.reels)
     setSpinning(false)
     await refreshProfile()
-    setResult({ won: data.won, gain: data.gain, bet: amt, reels: data.reels })
+    setResult({ won: data.won, gain: data.gain, bet: amt, reels: data.reels, nuevoSaldo: Number(data.nuevoSaldo) })
   }
 
   if (authLoading) return (
@@ -100,6 +100,7 @@ export default function TragamondasPage() {
   )
   if (!isAuthenticated) { router.push('/auth/login'); return null }
   if (!profile) return null
+  const saldoVisible = result?.nuevoSaldo ?? Number(profile.saldo_virtual)
 
   return (
     <div style={{ minHeight:'100vh', background:'var(--casino-dark)' }}>
@@ -124,7 +125,7 @@ export default function TragamondasPage() {
         {/* Saldo */}
         <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:'16px' }}>
           <span className="font-cinzel" style={{ color:'var(--casino-gold)', fontSize:'16px' }}>
-            💰 S/ {Number(profile.saldo_virtual).toFixed(2)}
+            💰 S/ {saldoVisible.toFixed(2)}
           </span>
         </div>
 
@@ -224,7 +225,7 @@ export default function TragamondasPage() {
               {result.won ? `¡Ganaste S/ ${result.gain.toFixed(2)}!` : `Perdiste S/ ${result.bet.toFixed(2)}`}
             </div>
             <p style={{ color:'var(--casino-muted)', fontSize:'13px', marginBottom:'20px' }}>
-              Nuevo saldo: S/ {Number(profile.saldo_virtual).toFixed(2)}
+              Nuevo saldo: S/ {result.nuevoSaldo.toFixed(2)}
             </p>
             <div style={{ display:'flex', gap:'11px', justifyContent:'center' }}>
               <button className="btn-gold" onClick={() => { setResult(null); setBetAmount('') }}>

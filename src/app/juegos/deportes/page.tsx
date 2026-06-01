@@ -17,7 +17,7 @@ export default function DeportesPage() {
   const [selectedOdd, setSelectedOdd] = useState<{label: string, odds: number} | null>(null)
   const [betAmount, setBetAmount] = useState('')
   const [checking, setChecking] = useState('')
-  const [result, setResult] = useState<{won: boolean, gain: number, bet: number, odds: number, pick: string, evento: EventoDeportivo} | null>(null)
+  const [result, setResult] = useState<{won: boolean, gain: number, bet: number, odds: number, pick: string, evento: EventoDeportivo, nuevoSaldo:number} | null>(null)
   const [limitError, setLimitError] = useState<string>('')
   const [error, setError] = useState('')
 
@@ -69,7 +69,7 @@ export default function DeportesPage() {
     }
 
     await refreshProfile()
-    setResult({ won: data.won, gain: data.gain, bet: amt, odds: selectedOdd.odds, pick: selectedOdd.label, evento: selectedEvento })
+    setResult({ won: data.won, gain: data.gain, bet: amt, odds: selectedOdd.odds, pick: selectedOdd.label, evento: selectedEvento, nuevoSaldo: Number(data.nuevoSaldo) })
   }
 
   if (authLoading) return (
@@ -79,6 +79,7 @@ export default function DeportesPage() {
   )
   if (!isAuthenticated) { router.push('/auth/login'); return null }
   if (!profile) return null
+  const saldoVisible = result?.nuevoSaldo ?? Number(profile.saldo_virtual)
 
   return (
     <div style={{ minHeight:'100vh', background:'var(--casino-dark)' }}>
@@ -103,7 +104,7 @@ export default function DeportesPage() {
         {/* Saldo */}
         <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:'16px' }}>
           <span className="font-cinzel" style={{ color:'var(--casino-gold)', fontSize:'16px' }}>
-            💰 S/ {Number(profile.saldo_virtual).toFixed(2)}
+            💰 S/ {saldoVisible.toFixed(2)}
           </span>
         </div>
 
@@ -247,7 +248,7 @@ export default function DeportesPage() {
               {result.evento.equipo_local} vs {result.evento.equipo_visitante}
             </p>
             <p style={{ color:'var(--casino-muted)', fontSize:'13px', marginBottom:'22px' }}>
-              Selección: <span style={{ color:'var(--casino-gold)' }}>{result.pick}</span> @ {result.odds} · Nuevo saldo: S/ {Number(profile.saldo_virtual).toFixed(2)}
+              Selección: <span style={{ color:'var(--casino-gold)' }}>{result.pick}</span> @ {result.odds} · Nuevo saldo: S/ {result.nuevoSaldo.toFixed(2)}
             </p>
             <div style={{ display:'flex', gap:'11px', justifyContent:'center' }}>
               <button className="btn-gold" onClick={() => { setResult(null); setSelectedEvento(null); setSelectedOdd(null); setBetAmount('') }}>

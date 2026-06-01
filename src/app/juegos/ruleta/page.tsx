@@ -32,7 +32,7 @@ export default function RuletaPage() {
   const [spinning, setSpinning] = useState(false)
   const [checking, setChecking] = useState('')
   const [rotation, setRotation] = useState(0)
-  const [result, setResult] = useState<{number:number, color:string, won:boolean, gain:number, bet:number, type:string} | null>(null)
+  const [result, setResult] = useState<{number:number, color:string, won:boolean, gain:number, bet:number, type:string, nuevoSaldo:number} | null>(null)
   const [limitError, setLimitError] = useState<string>('')
   const [error, setError] = useState('')
 
@@ -89,7 +89,7 @@ export default function RuletaPage() {
     }
 
     await refreshProfile()
-    setResult({ number: data.segNumber, color: data.segColor, won: data.won, gain: data.gain, bet: amt, type: betType })
+    setResult({ number: data.segNumber, color: data.segColor, won: data.won, gain: data.gain, bet: amt, type: betType, nuevoSaldo: Number(data.nuevoSaldo) })
   }
 
   if (authLoading) return (
@@ -101,6 +101,7 @@ export default function RuletaPage() {
   if (!profile) return null
 
   const segs = ROULETTE.length
+  const saldoVisible = result?.nuevoSaldo ?? Number(profile.saldo_virtual)
 
   return (
     <div style={{ minHeight:'100vh', background:'var(--casino-dark)' }}>
@@ -125,7 +126,7 @@ export default function RuletaPage() {
         {/* Saldo actual */}
         <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:'16px' }}>
           <span className="font-cinzel" style={{ color:'var(--casino-gold)', fontSize:'16px' }}>
-            💰 S/ {Number(profile.saldo_virtual).toFixed(2)}
+            💰 S/ {saldoVisible.toFixed(2)}
           </span>
         </div>
 
@@ -339,7 +340,7 @@ export default function RuletaPage() {
               {result.won ? `¡Ganaste S/ ${result.gain.toFixed(2)}!` : `Perdiste S/ ${result.bet.toFixed(2)}`}
             </div>
             <p style={{ color:'var(--casino-muted)', fontSize:'13px', marginBottom:'22px' }}>
-              Apuesta: {result.type} · Nuevo saldo: S/ {Number(profile.saldo_virtual).toFixed(2)}
+              Apuesta: {result.type} · Nuevo saldo: S/ {result.nuevoSaldo.toFixed(2)}
             </p>
             <div style={{ display:'flex', gap:'11px', justifyContent:'center' }}>
               <button className="btn-gold" onClick={() => { setResult(null); setBetAmount(''); }}>
