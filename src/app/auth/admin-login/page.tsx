@@ -19,23 +19,6 @@ export default function AdminLoginPage() {
     setStep('verifying')
 
     try {
-      // 1. Verificar código admin y actualizar rol
-      const res = await fetch('/api/admin-access', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.error || 'Error de acceso')
-        setStep('form')
-        setLoading(false)
-        return
-      }
-
-      // 2. Iniciar sesión con Supabase Auth
       const supabase = createClient()
       const { error: authError } = await supabase.auth.signInWithPassword({
         email: form.email,
@@ -49,7 +32,22 @@ export default function AdminLoginPage() {
         return
       }
 
-      // 3. Redirigir al panel admin
+      const res = await fetch('/api/admin-access', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminCode: form.adminCode }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        await supabase.auth.signOut({ scope: 'local' }).catch(() => undefined)
+        setError(data.error || 'Error de acceso')
+        setStep('form')
+        setLoading(false)
+        return
+      }
+
       router.push('/admin/estadisticas')
       router.refresh()
 
@@ -69,7 +67,6 @@ export default function AdminLoginPage() {
     }}>
       <div className="card-casino animate-fadeIn" style={{ width: '100%', maxWidth: '420px', padding: 'clamp(28px,5vw,44px)', borderColor: 'rgba(139,0,0,0.4)' }}>
 
-        {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <div style={{ fontSize: '36px', marginBottom: '12px' }}>🔐</div>
           <div className="font-cinzel" style={{ fontSize: '20px', fontWeight: 700, color: '#FF5533', marginBottom: '8px' }}>
@@ -136,7 +133,6 @@ export default function AdminLoginPage() {
           </form>
         )}
 
-        {/* Warning */}
         <div style={{ marginTop: '20px', padding: '12px', background: 'rgba(139,0,0,0.08)', border: '1px solid rgba(139,0,0,0.2)', borderRadius: '8px', fontSize: '11px', color: 'var(--casino-muted)', textAlign: 'center', lineHeight: 1.6 }}>
           ⚠️ Este acceso queda registrado. El uso no autorizado está prohibido.
         </div>
