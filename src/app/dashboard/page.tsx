@@ -118,7 +118,7 @@ export default function DashboardPage() {
         {/* Stat cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '14px', marginBottom: '24px' }}>
           {[
-            { label: 'Saldo Virtual', value: `S/ ${Number(profile.saldo_virtual).toFixed(2)}`, icon: '💰', color: 'var(--casino-gold)' },
+            { label: 'Saldo Real', value: `S/ ${Number(profile.saldo_virtual).toFixed(2)}`, icon: '💰', color: 'var(--casino-gold)' },
             { label: 'Gastado Hoy', value: `S/ ${gastadoHoy.toFixed(2)}`, icon: '🎯', color: 'var(--casino-cream)' },
             { label: 'Límite Diario', value: `S/ ${limiteDiario}`, icon: '🛡️', color: '#64B5F6' },
             { label: 'Partidas Jugadas', value: String(totalPartidas), icon: '🎮', color: 'var(--casino-cream)' },

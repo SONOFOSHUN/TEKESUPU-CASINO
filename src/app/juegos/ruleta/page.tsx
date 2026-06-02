@@ -266,7 +266,7 @@ export default function RuletaPage() {
         {checking && (
           <div className="card-casino" style={{ padding:'14px', marginBottom:'18px', display:'flex', gap:'10px', alignItems:'center', justifyContent:'center' }}>
             <span className="spinner" style={{ width:'20px', height:'20px', borderWidth:'2px' }} />
-            <UMLBadge type="include" label={checking==='saldo' ? 'Verificar saldo virtual' : 'Verificar límites de uso'} />
+            <UMLBadge type="include" label={checking==='saldo' ? 'Verificar saldo real' : 'Verificar límites de uso'} />
           </div>
         )}
 

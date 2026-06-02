@@ -56,7 +56,7 @@ export default function SaldoPage() {
 
     if (res.ok) {
       setSaldo(data.nuevoSaldo)
-      setMsg(`✅ +S/ ${amt.toFixed(2)} añadidos a tu saldo virtual`)
+      setMsg(`✅ +S/ ${amt.toFixed(2)} añadidos a tu saldo real`)
       setDepositAmt('')
       setTimeout(() => setMsg(''), 3000)
     } else {
@@ -80,7 +80,7 @@ export default function SaldoPage() {
       <Navbar />
       <div style={{ maxWidth: '1080px', margin: '0 auto', padding: 'clamp(70px,10vw,88px) 16px 48px' }}>
 
-        <h1 className="font-cinzel" style={{ fontSize: '26px', marginBottom: '8px' }}>💰 Saldo Virtual</h1>
+        <h1 className="font-cinzel" style={{ fontSize: '26px', marginBottom: '8px' }}>💰 Saldo Real</h1>
         <div style={{ marginBottom: '28px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <UMLBadge type="include" label="Verificar saldo" />
           <span style={{ color: 'var(--casino-muted)', fontSize: '13px' }}>— Gestiona tu saldo y movimientos</span>
@@ -100,7 +100,7 @@ export default function SaldoPage() {
           {/* Recarga */}
           <div className="card-casino" style={{ padding: '28px' }}>
             <div className="font-cinzel" style={{ fontSize: '14px', marginBottom: '18px', color: 'var(--casino-gold)' }}>
-              Recargar Saldo Virtual
+              Recargar Saldo Real
             </div>
             <div style={{ display: 'flex', gap: '7px', marginBottom: '14px', flexWrap: 'wrap' }}>
               {[50, 100, 200, 500].map(a => (
@@ -127,9 +127,6 @@ export default function SaldoPage() {
               disabled={!depositAmt || parseFloat(depositAmt) <= 0}>
               Recargar
             </button>
-            <p style={{ color: 'var(--casino-muted)', fontSize: '11px', marginTop: '10px', lineHeight: 1.5 }}>
-              El saldo virtual es solo para fines de entretenimiento. No representa dinero real.
-            </p>
           </div>
         </div>
 

@@ -50,7 +50,7 @@ export default function CrecimientoPage() {
               <tr>
                 <th>Nombre</th>
                 <th>Rol</th>
-                <th>Saldo Virtual</th>
+                <th>Saldo Real</th>
                 <th>Registro</th>
                 <th>Estado</th>
               </tr>

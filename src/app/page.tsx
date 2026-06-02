@@ -14,10 +14,10 @@ const FLOAT_SYMBOLS = [
 
 const TICKER_ITEMS = [
   '🎡  Ruleta Europea', '🎰  Tragamonedas HD', '⚽  Liga 1 Perú',
-  '🏆  Champions League', '🛡️  Verificación SERNAP', '💰  Saldo Virtual Gratis',
+  '🏆  Champions League', '🛡️  Verificación SERNAP', '💰  Saldo Real Gratis',
   '📊  Límites Personalizados', '🔒  100% Seguro',
   '🎡  Ruleta Europea', '🎰  Tragamonedas HD', '⚽  Liga 1 Perú',
-  '🏆  Champions League', '🛡️  Verificación SERNAP', '💰  Saldo Virtual Gratis',
+  '🏆  Champions League', '🛡️  Verificación SERNAP', '💰  Saldo Real Gratis',
   '📊  Límites Personalizados', '🔒  100% Seguro',
 ]
 
@@ -235,7 +235,7 @@ export default function LandingPage() {
           }}>
             Acceso exclusivo para usuarios{' '}
             <strong style={{ color: '#EDE0C4' }}>verificados sin registros de ludopatía</strong>.
-            Recibe S/ 1,000 de saldo virtual gratis.
+            Recibe S/ 1,000 de saldo real gratis.
           </p>
 
           {/* CTAs */}
@@ -254,7 +254,7 @@ export default function LandingPage() {
 
           {/* Feature pills */}
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center', animation: 'fadeUp 1s .4s ease both' }}>
-            {['🛡️ Anti-Ludopatía', '🎰 3 Juegos', '📊 Límites Propios', '🔒 Saldo Virtual'].map(f => (
+            {['🛡️ Anti-Ludopatía', '🎰 3 Juegos', '📊 Límites Propios', '🔒 Saldo Real'].map(f => (
               <span key={f} className="feature-pill">{f}</span>
             ))}
           </div>
@@ -370,7 +370,7 @@ export default function LandingPage() {
               {[
                 { n: '01', icon: '📝', title: 'Te registras', desc: 'Ingresa tu nombre, email, DNI y contraseña. El proceso toma menos de 2 minutos.' },
                 { n: '02', icon: '🔍', title: 'Verificamos tu DNI', desc: 'Consultamos el sistema nacional SERNAP para confirmar que no tienes registros de ludopatía.' },
-                { n: '03', icon: '✅', title: 'Accedes al casino', desc: 'Con verificación exitosa obtienes acceso completo y S/ 1,000 de saldo virtual.' },
+                { n: '03', icon: '✅', title: 'Accedes al casino', desc: 'Con verificación exitosa obtienes acceso completo y S/ 1,000 de saldo real.' },
               ].map((s, i) => (
                 <div key={s.n} className="step-card card-casino" style={{ padding: '28px 24px', textAlign: 'center', borderColor: 'rgba(200,0,0,0.15)' }}>
                   {i < 2 && (
@@ -390,7 +390,7 @@ export default function LandingPage() {
         <section style={{ maxWidth: '1000px', margin: '0 auto', padding: 'clamp(60px,8vw,80px) 24px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '1px', background: 'rgba(200,0,0,0.12)', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(200,0,0,0.18)' }}>
             {[
-              { value: 'S/ 1,000', label: 'Saldo virtual de bienvenida', icon: '💰' },
+              { value: 'S/ 1,000', label: 'Saldo real de bienvenida', icon: '💰' },
               { value: '3',        label: 'Juegos disponibles',          icon: '🎮' },
               { value: '×35',      label: 'Multiplicador máximo',        icon: '📈' },
               { value: '100%',     label: 'Verificación anti-ludopatía', icon: '🛡️' },
@@ -417,7 +417,7 @@ export default function LandingPage() {
               ¿Listo para la <span style={{ color: '#FF3333' }}>experiencia?</span>
             </h2>
             <p style={{ color: '#787890', fontSize: '15px', lineHeight: 1.7, marginBottom: '32px' }}>
-              Regístrate gratis, verifica tu DNI y recibe <strong style={{ color: '#EDE0C4' }}>S/ 1,000 de saldo virtual</strong> para empezar a jugar de inmediato.
+              Regístrate gratis, verifica tu DNI y recibe <strong style={{ color: '#EDE0C4' }}>S/ 1,000 de saldo real</strong> para empezar a jugar de inmediato.
             </p>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <Link href="/auth/registro">
