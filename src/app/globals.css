@@ -3,14 +3,18 @@
 @import "tailwindcss";
 
 :root {
-  --casino-gold:   #C9A227;
-  --casino-dark:   #07070F;
-  --casino-dark2:  #0C0C18;
-  --casino-cream:  #EDE0C4;
-  --casino-muted:  #787890;
-  --casino-green:  #00C853;
-  --casino-red:    #CC2200;
-  --casino-border: rgba(201, 162, 39, 0.22);
+  --casino-gold:       #C9A227;
+  --casino-gold-dark:  #9A7A1E;
+  --casino-gold-light: #F0D060;
+  --casino-dark:       #07070F;
+  --casino-dark2:      #0C0C18;
+  --casino-dark3:      #11111F;
+  --casino-cream:      #EDE0C4;
+  --casino-muted:      #787890;
+  --casino-green:      #00C853;
+  --casino-red:        #8B0000;
+  --casino-red-bright: #CC2200;
+  --casino-border:     rgba(201, 162, 39, 0.22);
 }
 
 @layer base {
@@ -24,7 +28,7 @@
 
   ::-webkit-scrollbar       { width: 4px; }
   ::-webkit-scrollbar-track { background: var(--casino-dark2); }
-  ::-webkit-scrollbar-thumb { background: #9A7A1E; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb { background: var(--casino-gold-dark); border-radius: 2px; }
 }
 
 @layer components {
@@ -70,7 +74,7 @@
 
   /* ── Botón primario gold ─────────────────────────────────────── */
   .btn-gold {
-    background:      linear-gradient(135deg, #C9A227, #9A7A1E);
+    background:      linear-gradient(135deg, var(--casino-gold), var(--casino-gold-dark));
     color:           #000;
     font-family:     'Cinzel', serif;
     font-weight:     700;
@@ -173,7 +177,7 @@
   }
   .badge-gold {
     background:     rgba(201, 162, 39, 0.12);
-    color:          #C9A227;
+    color:          var(--casino-gold);
     border:         1px solid rgba(201, 162, 39, 0.25);
     padding:        3px 10px;
     border-radius:  20px;

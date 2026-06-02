@@ -104,7 +104,7 @@ export default function DashboardPage() {
 
         {/* Bienvenida */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '28px' }}>
-          <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--casino-gold), var(--casino-gold-dark, #9A7A1E))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#000', fontFamily: 'Cinzel', fontSize: '16px' }}>
+          <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--casino-gold), var(--casino-gold-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#000', fontFamily: 'Cinzel', fontSize: '16px' }}>
             {profile.nombre.substring(0, 2).toUpperCase()}
           </div>
           <div>
@@ -141,7 +141,7 @@ export default function DashboardPage() {
             <span className="font-cinzel" style={{ color: pct > 80 ? '#FF5533' : 'var(--casino-gold)' }}>{pct}%</span>
           </div>
           <div className="progress-bar">
-            <div className="progress-fill" style={{ width: `${pct}%`, background: pct > 80 ? 'var(--casino-red-bright, #CC2200)' : 'var(--casino-gold)' }} />
+            <div className="progress-fill" style={{ width: `${pct}%`, background: pct > 80 ? 'var(--casino-red-bright)' : 'var(--casino-gold)' }} />
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '11px', color: 'var(--casino-muted)' }}>
             <span>S/ {gastadoHoy.toFixed(2)} gastados</span>

@@ -158,7 +158,7 @@ export default function RuletaPage() {
               width:0, height:0,
               borderLeft:'10px solid transparent',
               borderRight:'10px solid transparent',
-              borderTop:'20px solid #C9A227',
+              borderTop:'20px solid var(--casino-gold)',
               zIndex:10,
               filter:'drop-shadow(0 0 6px rgba(201,162,39,0.8))'
             }} />

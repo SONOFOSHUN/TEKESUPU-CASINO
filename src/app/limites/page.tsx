@@ -86,7 +86,7 @@ export default function LimitesPage() {
     return (
       <div>
         <div className="progress-bar">
-          <div className="progress-fill" style={{ width:`${pct}%`, background: pct > 80 ? 'var(--casino-red-bright, #CC2200)' : 'var(--casino-gold)' }} />
+          <div className="progress-fill" style={{ width:`${pct}%`, background: pct > 80 ? 'var(--casino-red-bright)' : 'var(--casino-gold)' }} />
         </div>
         <div style={{ display:'flex', justifyContent:'space-between', marginTop:'4px', fontSize:'11px', color:'var(--casino-muted)' }}>
           <span>S/ {gastado.toFixed(2)} usado</span>

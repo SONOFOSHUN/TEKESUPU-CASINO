@@ -176,8 +176,8 @@ export default function UsuariosAdminPage() {
                     <div style={{
                       width: '40px', height: '40px', borderRadius: '50%', flexShrink: 0,
                       background: u.rol === 'admin'
-                        ? 'linear-gradient(135deg, #8B0000, #CC2200)'
-                        : 'linear-gradient(135deg, var(--casino-gold), #9A7A1E)',
+                        ? 'linear-gradient(135deg, var(--casino-red), var(--casino-red-bright))'
+                        : 'linear-gradient(135deg, var(--casino-gold), var(--casino-gold-dark))',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontWeight: 700, color: '#000', fontFamily: 'Cinzel', fontSize: '13px',
                     }}>
@@ -237,7 +237,7 @@ export default function UsuariosAdminPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{
                     width: '48px', height: '48px', borderRadius: '50%', flexShrink: 0,
-                    background: 'linear-gradient(135deg, var(--casino-gold), #9A7A1E)',
+                    background: 'linear-gradient(135deg, var(--casino-gold), var(--casino-gold-dark))',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontWeight: 700, color: '#000', fontFamily: 'Cinzel', fontSize: '16px',
                   }}>

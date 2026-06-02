@@ -106,12 +106,12 @@ export default function LandingPage() {
           transition: background 0.25s, transform 0.25s;
         }
         .step-card:hover .step-num {
-          background: linear-gradient(135deg,#CC0000,#8B0000);
+          background: linear-gradient(135deg,#CC0000,var(--casino-red));
           color:#fff; transform:scale(1.12);
         }
 
         .btn-red-land {
-          background: linear-gradient(135deg,#CC0000,#8B0000);
+          background: linear-gradient(135deg,#CC0000,var(--casino-red));
           color:#fff;
           font-family:'Cinzel',serif; font-weight:700; font-size:13px;
           letter-spacing:1px; text-transform:uppercase;
@@ -127,7 +127,7 @@ export default function LandingPage() {
 
         .btn-outline-land {
           background: transparent;
-          color:#EDE0C4;
+          color:var(--casino-cream);
           font-family:'Cinzel',serif; font-weight:700; font-size:13px;
           letter-spacing:1px; text-transform:uppercase;
           border:1.5px solid rgba(200,0,0,0.45); border-radius:8px; padding:12px 32px;
@@ -149,7 +149,7 @@ export default function LandingPage() {
         html { scroll-behavior: smooth; }
       `}</style>
 
-      <div style={{ background: '#07070F', color: '#EDE0C4', minHeight: '100vh', overflowX: 'hidden' }}>
+      <div style={{ background: 'var(--casino-dark)', color: 'var(--casino-cream)', minHeight: '100vh', overflowX: 'hidden' }}>
 
         <nav style={{
           position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200,
@@ -157,7 +157,7 @@ export default function LandingPage() {
           borderBottom: '1px solid rgba(200,0,0,0.15)',
           display: 'flex', alignItems: 'center', padding: '0 24px', justifyContent: 'space-between',
         }}>
-          <span className="font-cinzel" style={{ fontSize: '16px', fontWeight: 700, color: '#C9A227', letterSpacing: '1.5px' }}>
+          <span className="font-cinzel" style={{ fontSize: '16px', fontWeight: 700, color: 'var(--casino-gold)', letterSpacing: '1.5px' }}>
             ♠ TEKESUPU ♣
           </span>
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -193,7 +193,7 @@ export default function LandingPage() {
             <div key={i} style={{
               position: 'absolute', left: s.x, bottom: '-10%',
               fontSize: `${s.size}px`, opacity: s.opacity,
-              color: s.sym === '♥' || s.sym === '♦' ? '#CC0000' : '#EDE0C4',
+              color: s.sym === '♥' || s.sym === '♦' ? '#CC0000' : 'var(--casino-cream)',
               fontFamily: 'serif', lineHeight: 1, userSelect: 'none', pointerEvents: 'none',
               animation: `floatUp ${s.dur} ${s.delay} linear infinite`,
             }}>
@@ -229,12 +229,12 @@ export default function LandingPage() {
 
           {/* Subtitle */}
           <p style={{
-            fontSize: 'clamp(14px,3vw,18px)', color: '#787890', maxWidth: '520px',
+            fontSize: 'clamp(14px,3vw,18px)', color: 'var(--casino-muted)', maxWidth: '520px',
             lineHeight: 1.8, marginBottom: '40px', animation: 'fadeUp 1s .2s ease both',
             padding: '0 8px',
           }}>
             Acceso exclusivo para usuarios{' '}
-            <strong style={{ color: '#EDE0C4' }}>verificados sin registros de ludopatía</strong>.
+            <strong style={{ color: 'var(--casino-cream)' }}>verificados sin registros de ludopatía</strong>.
             Recibe S/ 1,000 de saldo real gratis.
           </p>
 
@@ -262,8 +262,8 @@ export default function LandingPage() {
           {/* Scroll hint */}
           <div style={{ position: 'absolute', bottom: '28px', left: '50%', transform: 'translateX(-50%)', opacity: .35, animation: 'fadeUp 1s .8s ease both' }}>
             <svg width="20" height="32" viewBox="0 0 20 32" fill="none">
-              <rect x="1" y="1" width="18" height="30" rx="9" stroke="#EDE0C4" strokeWidth="1.5"/>
-              <circle cx="10" cy="9" r="2.5" fill="#EDE0C4" style={{ animation: 'floatUp 2s ease-in-out infinite alternate' }}/>
+              <rect x="1" y="1" width="18" height="30" rx="9" stroke="var(--casino-cream)" strokeWidth="1.5"/>
+              <circle cx="10" cy="9" r="2.5" fill="var(--casino-cream)" style={{ animation: 'floatUp 2s ease-in-out infinite alternate' }}/>
             </svg>
           </div>
         </section>
@@ -336,14 +336,14 @@ export default function LandingPage() {
                       </span>
                     </div>
                     <div style={{ fontSize: '48px', marginBottom: '16px' }}>{g.icon}</div>
-                    <h3 className="font-cinzel" style={{ fontSize: '20px', color: '#EDE0C4', marginBottom: '10px', fontWeight: 700 }}>{g.name}</h3>
-                    <p style={{ color: '#787890', fontSize: '13px', lineHeight: 1.7, marginBottom: '20px' }}>{g.desc}</p>
+                    <h3 className="font-cinzel" style={{ fontSize: '20px', color: 'var(--casino-cream)', marginBottom: '10px', fontWeight: 700 }}>{g.name}</h3>
+                    <p style={{ color: 'var(--casino-muted)', fontSize: '13px', lineHeight: 1.7, marginBottom: '20px' }}>{g.desc}</p>
                     {/* Mini stats */}
                     <div style={{ display: 'flex', gap: '16px', borderTop: '1px solid rgba(200,0,0,0.15)', paddingTop: '16px' }}>
                       {g.stats.map(s => (
                         <div key={s.l}>
                           <div className="font-cinzel" style={{ color: '#CC0000', fontSize: '18px', fontWeight: 700 }}>{s.v}</div>
-                          <div style={{ color: '#787890', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{s.l}</div>
+                          <div style={{ color: 'var(--casino-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{s.l}</div>
                         </div>
                       ))}
                     </div>
@@ -378,8 +378,8 @@ export default function LandingPage() {
                   )}
                   <div className="step-num">{s.n}</div>
                   <div style={{ fontSize: '28px', marginBottom: '12px' }}>{s.icon}</div>
-                  <h3 className="font-cinzel" style={{ fontSize: '15px', marginBottom: '10px', color: '#EDE0C4' }}>{s.title}</h3>
-                  <p style={{ color: '#787890', fontSize: '13px', lineHeight: 1.65 }}>{s.desc}</p>
+                  <h3 className="font-cinzel" style={{ fontSize: '15px', marginBottom: '10px', color: 'var(--casino-cream)' }}>{s.title}</h3>
+                  <p style={{ color: 'var(--casino-muted)', fontSize: '13px', lineHeight: 1.65 }}>{s.desc}</p>
                 </div>
               ))}
             </div>
@@ -399,7 +399,7 @@ export default function LandingPage() {
                 onMouseEnter={undefined}>
                 <div style={{ fontSize: '26px', marginBottom: '10px' }}>{s.icon}</div>
                 <div className="font-cinzel" style={{ fontSize: 'clamp(24px,4vw,36px)', fontWeight: 900, color: '#CC0000', marginBottom: '6px' }}>{s.value}</div>
-                <div style={{ color: '#787890', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.6px' }}>{s.label}</div>
+                <div style={{ color: 'var(--casino-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.6px' }}>{s.label}</div>
               </div>
             ))}
           </div>
@@ -416,8 +416,8 @@ export default function LandingPage() {
             <h2 className="font-cinzel" style={{ fontSize: 'clamp(26px,5vw,44px)', fontWeight: 900, marginBottom: '16px', lineHeight: 1.15 }}>
               ¿Listo para la <span style={{ color: '#FF3333' }}>experiencia?</span>
             </h2>
-            <p style={{ color: '#787890', fontSize: '15px', lineHeight: 1.7, marginBottom: '32px' }}>
-              Regístrate gratis, verifica tu DNI y recibe <strong style={{ color: '#EDE0C4' }}>S/ 1,000 de saldo real</strong> para empezar a jugar de inmediato.
+            <p style={{ color: 'var(--casino-muted)', fontSize: '15px', lineHeight: 1.7, marginBottom: '32px' }}>
+              Regístrate gratis, verifica tu DNI y recibe <strong style={{ color: 'var(--casino-cream)' }}>S/ 1,000 de saldo real</strong> para empezar a jugar de inmediato.
             </p>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <Link href="/auth/registro">
@@ -440,7 +440,7 @@ export default function LandingPage() {
           <h3 className="font-cinzel" style={{ fontSize: 'clamp(16px,3vw,22px)', marginBottom: '12px' }}>
             Compromiso con el <span style={{ color: '#CC0000' }}>Juego Responsable</span>
           </h3>
-          <p style={{ color: '#787890', fontSize: '13px', lineHeight: 1.8, marginBottom: '20px' }}>
+          <p style={{ color: 'var(--casino-muted)', fontSize: '13px', lineHeight: 1.8, marginBottom: '20px' }}>
             Tekesupu es una plataforma educativa de entretenimiento. No involucra dinero real. Promovemos el entretenimiento responsable con límites configurables y verificación anti-ludopatía.
           </p>
           <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -452,8 +452,8 @@ export default function LandingPage() {
 
         {/* ── Footer ──────────────────────────────────────────────── */}
         <footer style={{ borderTop: '1px solid rgba(200,0,0,0.15)', padding: '28px 24px', textAlign: 'center' }}>
-          <div className="font-cinzel" style={{ color: '#C9A227', fontSize: '14px', marginBottom: '8px', letterSpacing: '2px' }}>♠ TEKESUPU ♣</div>
-          <p style={{ color: '#787890', fontSize: '11px' }}>© 2026 Tekesupu Casino · Solo para fines educativos · Tecsup</p>
+          <div className="font-cinzel" style={{ color: 'var(--casino-gold)', fontSize: '14px', marginBottom: '8px', letterSpacing: '2px' }}>♠ TEKESUPU ♣</div>
+          <p style={{ color: 'var(--casino-muted)', fontSize: '11px' }}>© 2026 Tekesupu Casino · Solo para fines educativos · Tecsup</p>
         </footer>
 
       </div>

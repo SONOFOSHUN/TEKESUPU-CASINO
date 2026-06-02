@@ -96,7 +96,7 @@ export default function Navbar() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px' }}>
                 <div style={{
                   width: '30px', height: '30px', borderRadius: '50%',
-                  background: 'linear-gradient(135deg, var(--casino-gold), #9A7A1E)',
+                  background: 'linear-gradient(135deg, var(--casino-gold), var(--casino-gold-dark))',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontWeight: 700, color: '#000', fontFamily: 'Cinzel', fontSize: '11px',
                 }}>
@@ -139,7 +139,7 @@ export default function Navbar() {
         >
           {/* User info */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', borderBottom: '1px solid var(--casino-border)', marginBottom: '12px' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--casino-gold), #9A7A1E)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#000', fontFamily: 'Cinzel', fontSize: '13px' }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--casino-gold), var(--casino-gold-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#000', fontFamily: 'Cinzel', fontSize: '13px' }}>
               {profile.nombre.substring(0, 2).toUpperCase()}
             </div>
             <div>
